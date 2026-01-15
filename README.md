@@ -96,4 +96,14 @@ Monitoring stack configuration is defined inside:
 📌 Add screenshots of working output + dashboards here:
 
 ```md
-![Agent Output](docs/screenshots/agent-output.png)
+<img width="1728" height="1024" alt="image" src="https://github.com/user-attachments/assets/c63611c3-8203-42fb-8ba1-6cb754abda38" />
+<img width="1728" height="1024" alt="image" src="https://github.com/user-attachments/assets/fa82679c-a0bd-4859-88dc-7bed5d648a67" />
+<img width="3456" height="2048" alt="image" src="https://github.com/user-attachments/assets/74728bb6-80f2-48a0-b0b5-f658436318f6" />
+<img width="3456" height="2048" alt="image" src="https://github.com/user-attachments/assets/6eac10fd-d606-4351-8d04-597a5c8a655c" />
+<img width="1728" height="1024" alt="Screenshot 2026-01-15 at 8 09 22 PM" src="https://github.com/user-attachments/assets/03162cb0-a00d-4cc6-9a40-76c56deed9be" />
+<img width="1728" height="1059" alt="image" src="https://github.com/user-attachments/assets/b77325af-9232-4e17-a1f7-555f93fc26d9" />
+
+
+
+
+
