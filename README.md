@@ -101,11 +101,118 @@ Monitoring stack configuration is defined inside:
 
 <img width="3456" height="2048" alt="image" src="https://github.com/user-attachments/assets/74728bb6-80f2-48a0-b0b5-f658436318f6" />
 
-<img width="3456" height="2048" alt="image" src="https://github.com/user-attachments/assets/6eac10fd-d606-4351-8d04-597a5c8a655c" />
+<img width="1728" height="1024" alt="Screenshot 2026-01-15 at 8 08 50 PM" src="https://github.com/user-attachments/assets/15acf5e8-69bb-49ff-80b1-450b7e811428" />
+
 
 <img width="1728" height="1024" alt="Screenshot 2026-01-15 at 8 09 22 PM" src="https://github.com/user-attachments/assets/03162cb0-a00d-4cc6-9a40-76c56deed9be" />
 
 <img width="1728" height="1059" alt="image" src="https://github.com/user-attachments/assets/b77325af-9232-4e17-a1f7-555f93fc26d9" />
+
+
+## ✅ Task 2:Kubernetes POC (Manifests + Tilt Demo)
+
+This folder contains a hands-on Kubernetes POC covering core primitives (Pod/Deployment/Service), ConfigMap/Secret usage patterns, the sidecar pattern, and a Tilt-based local dev loop.
+
+## What’s included
+
+### 1)Tilt demo (local dev loop)
+The Tilt demo builds a tiny NGINX image serving a local `index.html`, deploys it to Kubernetes, and port-forwards it.
+
+Files:
+- Tilt config: [tilt-demo/Tiltfile](tilt-demo/Tiltfile)
+- K8s manifests: [tilt-demo/k8s.yaml](tilt-demo/k8s.yaml)
+- Image build: [tilt-demo/Dockerfile](tilt-demo/Dockerfile)
+- Web content: [tilt-demo/index.html](tilt-demo/index.html)
+
+Run:
+
+```bash
+cd tilt-demo
+
+tilt up
+```
+
+Then open the forwarded URL shown by Tilt (configured as `port_forwards=8080`).
+
+Screenshot space:
+
+```md
+<img width="1728" height="1059" alt="image" src="https://github.com/user-attachments/assets/8fd9c9ea-a7df-4928-bea8-bcc56643fdf2" />
+
+<img width="1728" height="1059" alt="image" src="https://github.com/user-attachments/assets/d2a284c3-b992-46a3-8e12-8c201c5327fd" />
+
+```
+
+### 2) NGINX Deployment + Service
+- **Deployment**: 2 replicas of `nginx:latest`.
+  - File: [deployment.yaml](deployment.yaml)
+- **Service**: `NodePort` service exposing port 80.
+  - File: [service.yaml](service.yaml)
+
+Run:
+
+```bash
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl get pods
+kubectl get svc
+```
+---
+
+### 3) ConfigMap (Mount NGINX config)
+This demo mounts a ConfigMap into `/etc/nginx/conf.d` to serve a custom response.
+
+- ConfigMap with `custom.conf`:
+  - File: [nginx-config.yaml](nginx-config.yaml)
+- Pod that mounts the config:
+  - File: [nginx-config-pod.yaml](nginx-config-pod.yaml)
+
+Run:
+
+```bash
+kubectl apply -f nginx-config.yaml
+kubectl apply -f nginx-config-pod.yaml
+kubectl get pod nginx-configmap-pod
+kubectl port-forward pod/nginx-configmap-pod 8081:80
+```
+
+
+---
+
+
+### 4) Secret env var (references `db-secret`)
+The pod in [pod-secret.yaml](pod-secret.yaml) references a Secret named `db-secret` via env vars.
+
+Note: this folder currently contains the **pod** that consumes `db-secret`, but not a manifest defining the `db-secret` Secret.
+
+Create it (example):
+
+```bash
+kubectl create secret generic db-secret \
+  --from-literal=DB_USER=admin \
+  --from-literal=DB_PASS='pass123'
+
+kubectl apply -f pod-secret.yaml
+kubectl exec -it secret-demo -- env | egrep 'DB_USER|DB_PASS'
+```
+
+---
+
+### 5) Sidecar pattern demo (shared logs)
+A single Pod with:
+- **app container** writing logs to `/var/log/app.log`
+- **sidecar container** tailing the same file
+- shared volume: `emptyDir` mounted into both containers
+
+File: [sidecar.yaml](sidecar.yaml) (same as [sidecar-demo.yaml](sidecar-demo.yaml))
+
+Run:
+
+```bash
+kubectl apply -f sidecar.yaml
+kubectl logs -f sidecar-demo -c sidecar
+```
+---
 
 
 
