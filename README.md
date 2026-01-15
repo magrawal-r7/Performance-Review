@@ -134,12 +134,11 @@ tilt up
 
 Then open the forwarded URL shown by Tilt (configured as `port_forwards=8080`).
 
-Screenshot space:
+### 📸 Screenshots
 
-```md
-<img width="1728" height="1059" alt="image" src="https://github.com/user-attachments/assets/8fd9c9ea-a7df-4928-bea8-bcc56643fdf2" />
+![Screenshot 1](https://github.com/user-attachments/assets/8fd9c9ea-a7df-4928-bea8-bcc56643fdf2)
 
-<img width="1728" height="1059" alt="image" src="https://github.com/user-attachments/assets/d2a284c3-b992-46a3-8e12-8c201c5327fd" />
+![Screenshot 2](https://github.com/user-attachments/assets/d2a284c3-b992-46a3-8e12-8c201c5327fd)
 
 ```
 
