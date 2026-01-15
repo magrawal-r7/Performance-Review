@@ -7,125 +7,93 @@ This repository documents the proof-of-concept work completed for five key techn
 
 ---
 
-## Task 1: Kubernetes (K8s) Knowledge Share
+# Project POC: 5 Key Tasks
 
-This section covers key learnings and implementation details from the Kubernetes proof-of-concept.
+This repository documents the proof-of-concept work completed for five key technical tasks.
 
-### Key Learnings & Architectural Insights:
--   **Declarative Manifests**: Implemented core Kubernetes objects like Deployments, Services, and Pods using YAML manifests to define the desired state.
--   **Sidecar Pattern**: Demonstrated the sidecar pattern for extending container functionality without modifying the main application. A logging sidecar was used to read logs from a shared volume.
--   **Local Development with Tilt**: Implemented a `Tiltfile` to enable a fast, iterative local development workflow for Kubernetes. Tilt automatically builds and deploys changes to a local cluster.
+✅ **Primary Deliverable:** The consolidated `crewai/` implementation (Agent Development + Resource Monitoring + Async FastAPI execution).  
+Supporting POCs include Kubernetes + Tilt demo and AI Gateway analysis placeholders.
 
-### Implemented Concepts:
--   **Nginx Deployment & Service**: A 2-replica Nginx deployment exposed via a NodePort service. See [kubernates/deployment.yaml](kubernates/deployment.yaml) and [kubernates/service.yaml](kubernates/service.yaml).
--   **Sidecar Demo**: A pod with a main application writing to a log file and a sidecar container tailing that file. See [kubernates/sidecar.yaml](kubernates/sidecar.yaml).
--   **Tilt Demo**: A simple web server with a `Tiltfile` for automated local deployment. See the `kubernates/tilt-demo/` directory.
+The implementation is organized into two main folders:
 
-### Screenshots:
-
-*Add your screenshots of `kubectl` outputs or Tilt UI here.*
-
-```md
-![Tilt UI](docs/screenshots/tilt-ui.png)
-```
-
-```md
-![Kubernetes Pods](docs/screenshots/k8s-pods.png)
-```
+- `crewai/`: Consolidated solution for Agent Development, Resource Monitoring, and Asynchronous Python execution.
+- `kubernates/`: Kubernetes learning + YAML manifests + sidecar demo + Tilt local dev workflow.
 
 ---
 
-## Task 2: AI Gateway Analysis
+## ✅ Task 1: CrewAI Agent + Async FastAPI + Resource Utilization (Primary Deliverable)
 
-This section is for demonstrating the analysis of AI Gateway logs to identify latency patterns and error rates within a specific region.
+This task delivers the **end-to-end working application** that includes:
 
-### Latency Patterns:
+✅ CrewAI agent development  
+✅ Async FastAPI server behavior  
+✅ CPU/RAM/App memory monitoring  
+✅ Prometheus + Grafana dashboards for visualization  
 
-*Add screenshots of logs or dashboards showing gateway latency.*
-
-```md
-![Gateway Latency Analysis](docs/screenshots/gateway-latency.png)
-```
-
-### Error Rates:
-
-*Add screenshots of logs or dashboards showing gateway error rates.*
-
-```md
-![Gateway Error Rate Analysis](docs/screenshots/gateway-errors.png)
-```
+This is the final combined implementation and serves as the **core POC output** of this repository.
 
 ---
 
-## Task 3: Agent Development Status
+### ✅ 1. Agent Development (CrewAI)
 
-This section provides a walkthrough of the custom CrewAI agent that was built.
+#### Agent Architecture:
+- **Two-Agent Crew**
+  1. **Researcher Agent**: Scans a given topic to extract key bullet points.
+  2. **Writer Agent**: Converts bullet points into a clean concise summary.
+- **LLM Integration**
+  - Uses **Groq LLaMA 3.3 70B**
+  - Controlled using `GROQ_API_KEY`
+- **Implementation**
+  - Agent, Task, and Crew definitions are implemented inside:
+    - `crewai/server.py`
 
-### Agent Architecture:
--   **Two-Agent Crew**:
-    1.  **Researcher Agent**: Scans a given topic to extract key bullet points.
-    2.  **Writer Agent**: Takes the bullet points and composes a concise summary.
--   **LLM Integration**: The agents are powered by the Groq LLaMA 3 model, configured via a `GROQ_API_KEY`.
--   **Implementation**: The agent, task, and crew definitions can be found in [crewai/server.py](crewai/server.py).
+---
 
-### Demo:
-The agent's functionality can be tested via the FastAPI endpoint or the Streamlit UI.
+### ✅ 2. Asynchronous Execution (FastAPI + Job Workflow)
 
-### Screenshots:
+To improve responsiveness, the long running CrewAI `kickoff()` call (blocking) is executed asynchronously using:
 
-*Add a screenshot of the final output from the agent.*
+✅ `asyncio.to_thread()` — so the API remains responsive while CrewAI runs in background
+
+#### Workflow:
+1. `POST /run` submits a topic and immediately returns a `job_id`
+2. The job starts in the background
+3. `GET /status/{job_id}` allows polling for completion
+4. `GET /metrics` exposes Prometheus-compatible metrics
+
+#### Key endpoints:
+- `/health` → health + metrics update
+- `/run` → submit background CrewAI job
+- `/status/{job_id}` → job tracking
+- `/metrics` → Prometheus scrape endpoint
+- `/utilization` → system CPU/RAM/App memory in JSON
+
+---
+
+### ✅ 3. Resource Monitoring (Grafana Graphing)
+
+This POC includes full observability for CPU + Memory monitoring using:
+
+- **Prometheus** (scrapes metrics from application)
+- **Grafana** (visualizes dashboards)
+- **Docker Compose** (brings up monitoring stack quickly)
+
+#### Prometheus Metrics Exposed
+The application exposes custom Prometheus metrics, such as:
+
+- `crewai_cpu_percent`, `crewai_ram_percent`, `crewai_app_memory_mb`
+- `crewai_jobs_total`, `crewai_jobs_running`
+- `crewai_jobs_success_total`, `crewai_jobs_failed_total`
+
+Monitoring stack configuration is defined inside:
+- `crewai/docker-compose.yml`
+- `crewai/prometheus.yml`
+
+---
+
+### ✅ Demo Screenshots
+
+📌 Add screenshots of working output + dashboards here:
 
 ```md
 ![Agent Output](docs/screenshots/agent-output.png)
-```
-
----
-
-## Task 4: Resource Monitoring (Grafana)
-
-This section covers how CPU/Memory utilization and scaling behavior of the agent application are monitored.
-
-### Monitoring Stack:
--   **Prometheus**: Scrapes metrics from the application's `/metrics` endpoint.
--   **Grafana**: Provides visualization dashboards for the metrics collected by Prometheus.
--   **Docker Compose**: The entire monitoring stack is defined and managed in [crewai/docker-compose.yml](crewai/docker-compose.yml).
-
-### Exposed Metrics:
-The application exposes custom Prometheus metrics, including:
--   `crewai_cpu_percent`, `crewai_ram_percent`, `crewai_app_memory_mb`
--   `crewai_jobs_total`, `crewai_jobs_running`, `crewai_jobs_success_total`, `crewai_jobs_failed_total`
--   The metrics are generated in [crewai/server.py](crewai/server.py).
-
-### Screenshots:
-
-*Add screenshots of your Grafana dashboards showing CPU/Memory utilization.*
-
-```md
-![Grafana CPU Utilization](docs/screenshots/grafana-cpu.png)
-```
-
-```md
-![Grafana Memory Utilization](docs/screenshots/grafana-memory.png)
-```
-
----
-
-## Task 5: Technical Deep Dive: Asynchronous Python
-
-This section provides a walkthrough of the `async/await` implementation used to improve application performance.
-
-### Asynchronous Job Execution:
--   **FastAPI Server**: An asynchronous web server built with FastAPI is used to handle requests.
--   **Non-Blocking Operations**: The long-running CrewAI `kickoff()` process, which is blocking, is executed in a separate thread using `asyncio.to_thread()`. This prevents the server from being blocked and allows it to handle other requests concurrently.
--   **Job-Based Workflow**:
-    1.  A `POST` request to `/run` immediately returns a `job_id` and starts the agent task in the background.
-    2.  The status of the job can be polled via the `/status/{job_id}` endpoint.
--   **Implementation**: The core async logic is in the `run_job` function in [crewai/server.py](crewai/server.py).
-
-### Screenshots:
-
-*Add screenshots of API calls demonstrating the async workflow (e.g., Postman or curl).*
-
-```md
-![Async Job Submission](docs/screenshots/async-job-submission.png)
-```
